@@ -5,6 +5,8 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.newJob;
@@ -25,7 +27,12 @@ public class AlertRabbit {
         return props;
     }
 
-    public static void main(String[] args) {
+    private static Connection connection;
+
+    public static void main(String[] args) throws ClassNotFoundException {
+        Connection connection;
+        Class.forName(properties().getProperty("driver-class-name"));
+                try (connection = DriverManager.getConnection(url, login, password));
 
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
