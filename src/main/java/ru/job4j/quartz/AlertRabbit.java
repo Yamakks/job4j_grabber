@@ -25,36 +25,37 @@ public class AlertRabbit {
         }
         return props;
     }
-
-    private static Connection connection;
-
-    public static void main(String[] args) throws ClassNotFoundException {
+    private static Connection getConn() throws ClassNotFoundException {
         Properties pr = properties();
         Class.forName(pr.getProperty("driver-class-name"));
         String user = pr.getProperty("username");
         String pass = pr.getProperty("password");
         String url = pr.getProperty("url");
+        Connection connect = DriverManager.getConnection(url, user, pass);
+        return connect;
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+
         try {
-            connection = DriverManager.getConnection(url, user, pass);
+            Connection conn = getConn()
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
-            data.put("connection", connection);
+            data.put("connection", conn);
             JobDetail job = newJob(Rabbit.class).build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(pr.getProperty("rabbit.interval")))
+                    .withIntervalInSeconds(Integer.parseInt(properties().getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
                     .withSchedule(times)
                     .build();
             scheduler.scheduleJob(job, trigger);
-            Thread.sleep(Long.parseLong(pr.getProperty("timeSleep")));
+            Thread.sleep(Long.parseLong(properties().getProperty("timeSleep")));
             scheduler.shutdown();
-
-
-            connection.close();
-        } catch (SchedulerException | SQLException se) {
+            conn.close();
+        } catch (SchedulerException se) {
             se.printStackTrace();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -62,20 +63,25 @@ public class AlertRabbit {
     }
 
     public static class Rabbit implements Job {
+        private Connection connection;
+
+        public Rabbit() {
+        }
+
+        public void setConnection(Connection connection) {
+            this.connection = connection;
+        }
+
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
-               try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO rabbit(CREATED) VALUES (?)")) {
-                preparedStatement.setDate(1, new Date(1111-11-11));
-                if (preparedStatement.executeUpdate() > 0) {
-                    System.out.println("Изменения внесены в таблицу.");
-                } else {
-                    System.out.println("Изменения не были внесены в таблицу.");
-                }
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO rabbit(created) VALUES (?)");
+                preparedStatement.setDate(1, new java.sql.Date(System.currentTimeMillis()));
+                preparedStatement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
         }
     }
 }
