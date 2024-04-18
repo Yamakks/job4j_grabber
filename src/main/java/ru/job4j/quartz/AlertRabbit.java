@@ -25,7 +25,7 @@ public class AlertRabbit {
         }
         return props;
     }
-    private static Connection getConn() throws ClassNotFoundException {
+    private static Connection getConn() throws ClassNotFoundException, SQLException {
         Properties pr = properties();
         Class.forName(pr.getProperty("driver-class-name"));
         String user = pr.getProperty("username");
@@ -38,12 +38,14 @@ public class AlertRabbit {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
 
         try {
-            Connection conn = getConn()
+            Connection conn = getConn();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
-            data.put("connection", conn);
-            JobDetail job = newJob(Rabbit.class).build();
+            data.put("conn", conn);
+            JobDetail job = newJob(Rabbit.class)
+                    .usingJobData(data)
+                    .build();
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(Integer.parseInt(properties().getProperty("rabbit.interval")))
                     .repeatForever();
@@ -54,7 +56,6 @@ public class AlertRabbit {
             scheduler.scheduleJob(job, trigger);
             Thread.sleep(Long.parseLong(properties().getProperty("timeSleep")));
             scheduler.shutdown();
-            conn.close();
         } catch (SchedulerException se) {
             se.printStackTrace();
         } catch (InterruptedException e) {
@@ -63,21 +64,18 @@ public class AlertRabbit {
     }
 
     public static class Rabbit implements Job {
-        private Connection connection;
+        private Connection connection = getConn();
 
-        public Rabbit() {
+        public Rabbit() throws SQLException, ClassNotFoundException {
         }
 
-        public void setConnection(Connection connection) {
-            this.connection = connection;
-        }
 
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
             try {
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO rabbit(created) VALUES (?)");
-                preparedStatement.setDate(1, new java.sql.Date(System.currentTimeMillis()));
+                PreparedStatement preparedStatement = ((Connection) context.getJobDetail().getJobDataMap().get("conn")).prepareStatement("INSERT INTO rabbit(created) VALUES (?)");
+                preparedStatement.setDate(1, new java.sql.Date(System.currentTime()));
                 preparedStatement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
