@@ -25,14 +25,14 @@ public class AlertRabbit {
         }
         return props;
     }
+
     private static Connection getConn() throws ClassNotFoundException, SQLException {
         Properties pr = properties();
         Class.forName(pr.getProperty("driver-class-name"));
         String user = pr.getProperty("username");
         String pass = pr.getProperty("password");
         String url = pr.getProperty("url");
-        Connection connect = DriverManager.getConnection(url, user, pass);
-        return connect;
+        return DriverManager.getConnection(url, user, pass);
     }
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
@@ -69,13 +69,12 @@ public class AlertRabbit {
         public Rabbit() throws SQLException, ClassNotFoundException {
         }
 
-
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
             try {
                 PreparedStatement preparedStatement = ((Connection) context.getJobDetail().getJobDataMap().get("conn")).prepareStatement("INSERT INTO rabbit(created) VALUES (?)");
-                preparedStatement.setDate(1, new java.sql.Date(System.currentTime()));
+                preparedStatement.setDate(1, new java.sql.Date(System.currentTimeMillis()));
                 preparedStatement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
