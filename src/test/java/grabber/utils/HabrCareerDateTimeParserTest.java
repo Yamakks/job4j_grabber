@@ -1,8 +1,10 @@
 package grabber.utils;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,10 +26,10 @@ class HabrCareerDateTimeParserTest {
     }
 
     @Test
-    void parseInvalidStringReturnsNull() {
+    void parseInvalidStringReturnsDateTimeParseException() {
         String dateString = "20240-04-21T13:45:30";
         HabrCareerDateTimeParser parser = new HabrCareerDateTimeParser();
-        LocalDateTime result = parser.parse(dateString);
-        assertNull(result);
+        assertThrows(DateTimeParseException.class, () -> parser.parse(dateString));
+
     }
 }
