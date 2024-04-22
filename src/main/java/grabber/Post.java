@@ -76,7 +76,6 @@ public class Post {
         return Objects.hash(id, link);
     }
 
-    // Метод для представления объекта в виде строки
     @Override
     public String toString() {
         return "Post{"
