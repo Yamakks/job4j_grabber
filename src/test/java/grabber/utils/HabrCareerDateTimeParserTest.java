@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class HabrCareerDateTimeParserTest {
     @Test
     void parseValidStringReturnsDate() {
-        String dateString = "2024-04-21T13:45:30";
+        String dateString = "2024-04-21T13:45:30+03:00";
         HabrCareerDateTimeParser parser = new HabrCareerDateTimeParser();
         LocalDateTime result = parser.parse(dateString);
         assertNotNull(result);
