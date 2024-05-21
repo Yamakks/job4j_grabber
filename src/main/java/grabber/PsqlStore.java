@@ -6,7 +6,6 @@ import grabber.utils.HabrCareerDateTimeParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -28,18 +27,18 @@ public class PsqlStore implements Store {
     }
 
     private Post generatePost(ResultSet resultSet) throws SQLException {
-        Post post = new Post(resultSet.getInt("id"),
+        return new Post(resultSet.getInt("id"),
                 resultSet.getString("name"),
                 resultSet.getString("link"),
                 resultSet.getString("text"),
                 resultSet.getTimestamp(5).toLocalDateTime());
-        return  post;
     }
 
     @Override
     public void save(Post post) {
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO post(name, text, link, created) VALUES (?, ?, ?, ?)",
+                     connection.prepareStatement("INSERT INTO post(name, text, link, created) VALUES (?, ?, ?, ?) "
+                                     + "ON CONFLICT (link) DO NOTHING",
                              Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, post.getTitle());
             preparedStatement.setString(2, post.getDescription());
