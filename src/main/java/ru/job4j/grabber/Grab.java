@@ -1,4 +1,4 @@
-package grabber;
+package ru.job4j.grabber;
 
 import org.quartz.SchedulerException;
 

@@ -1,10 +1,5 @@
-package grabber;
+package ru.job4j.grabber;
 
-import grabber.utils.DateTimeParser;
-import grabber.utils.HabrCareerDateTimeParser;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,23 +89,5 @@ public class PsqlStore implements Store {
         if (connection != null) {
             connection.close();
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        InputStream input = PsqlStore.class.getClassLoader()
-                .getResourceAsStream("db/liquibase.properties");
-            Properties config = new Properties();
-            config.load(input);
-        DateTimeParser dp = new HabrCareerDateTimeParser();
-        HabrCareerParse hh = new HabrCareerParse(dp);
-        Store ps = new PsqlStore(config);
-        for (Post post: hh.list("https://career.habr.com")) {
-            ps.save(post);
-        }
-        System.out.println("Проверка поиска по позиции");
-        System.out.println(ps.findById(25));
-        System.out.println("Проверка вывода всего списка");
-        System.out.println(ps.getAll());
-
     }
 }

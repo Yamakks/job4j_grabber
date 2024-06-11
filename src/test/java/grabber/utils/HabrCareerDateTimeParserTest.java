@@ -1,12 +1,13 @@
 package grabber.utils;
 
 import org.junit.jupiter.api.Test;
+import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HabrCareerDateTimeParserTest {
