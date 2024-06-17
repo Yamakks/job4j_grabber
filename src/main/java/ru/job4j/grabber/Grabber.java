@@ -5,6 +5,8 @@ import org.quartz.impl.StdSchedulerFactory;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.newJob;
@@ -12,6 +14,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Grabber implements Grab {
+    private static final String SOURCE_LINK = "https://career.habr.com";
     private final Parse parse;
     private final Store store;
     private final Scheduler scheduler;
@@ -48,10 +51,15 @@ public class Grabber implements Grab {
             JobDataMap map = context.getJobDetail().getJobDataMap();
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
-            /* TODO impl logic */
+            try {
+                System.out.println("DB updating...");
+                List<Post> vacancies = new ArrayList<>(parse.list(SOURCE_LINK));
+                vacancies.forEach(store::save);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
-
 
     public static void main(String[] args) throws Exception {
         var config = new Properties();
