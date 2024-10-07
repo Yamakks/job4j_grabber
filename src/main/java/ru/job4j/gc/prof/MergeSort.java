@@ -1,6 +1,6 @@
 package ru.job4j.gc.prof;
 
-public class MergeSort implements Sort{
+public class MergeSort implements Sort {
     @Override
     public boolean sort(Data data) {
         int[] array = data.getClone();
