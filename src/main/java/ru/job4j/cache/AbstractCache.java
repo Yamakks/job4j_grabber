@@ -10,11 +10,25 @@ public abstract class AbstractCache<K, V> {
 
     public final void put(K key, V value) {
 
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("Значения key или value не могут быть !NULL!");
+        }
+        cache.put(key, new SoftReference<>(value));
     }
 
     public final V get(K key) {
-
-        return null;
+        if (key == null) {
+            throw new IllegalArgumentException("Значение key не может быть !NULL!");
+        }
+        SoftReference<V> reference = cache.get(key);
+        V value = (reference != null) ? reference.get() : null;
+        if (value == null) {
+            value = load(key);
+        if (value != null) {
+            put(key, value);
+        }
+    }
+        return value;
     }
 
     protected abstract V load(K key);
