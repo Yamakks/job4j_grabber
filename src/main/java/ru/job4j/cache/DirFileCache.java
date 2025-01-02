@@ -16,7 +16,6 @@ public class DirFileCache extends AbstractCache<String, String> {
         this.cachingDir = cachingDir;
     }
 
-
     @Override
     protected String load(String key) {
         Path filePath = Paths.get(cachingDir, key);
